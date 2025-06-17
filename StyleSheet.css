@@ -1,0 +1,286 @@
+body {
+    font-family: "Lato", sans-serif;
+    margin-top: 0;
+    padding-top: 40px;
+  }
+
+  #file-selector {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  span {
+    position: relative;
+  }
+
+  .button {
+    background-color: #f7faff;
+    border: none;
+    color: white;
+    padding: 20px;
+    text-align: left;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 10px 10px;
+    border-radius: 12px;
+  }
+
+  .button.active {
+    background-color: #c9dbf9;
+  }
+
+  .toggle-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    }
+
+    .toggle-label {
+    font-size: 16px;
+    font-weight: bold;
+    }
+
+    .toggle-input {
+    display: none;
+    }
+
+    .toggle-slider {
+    position: relative;
+    width: 50px;
+    height: 25px;
+    background-color: #ccc;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    }
+
+    .toggle-slider::before {
+    content: '';
+    position: absolute;
+    width: 21px;
+    height: 21px;
+    background-color: white;
+    border-radius: 50%;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.3s;
+    }
+
+    .toggle-input:checked + .toggle-slider {
+    background-color: #8b9dc3;
+    }
+
+    .toggle-input:checked + .toggle-slider::before {
+    transform: translateX(25px);
+    }
+
+    .target-control {
+      display: flex;
+      justify-content: space-between; 
+      align-items: center;
+      padding: 0 15px;
+      gap: 10px;
+      font-weight: bold;
+    }
+    
+    .target-control input {
+      padding: 8px 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      background-color: #f9f9f9;
+      width: 60px;
+      text-align: center;
+    }
+    
+    .target-control button {
+      padding: 8px 16px;
+      background-color: #8b9dc3;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    
+    .target-control button:hover {
+      background-color: #6d7fa3;
+    }  
+
+  .headImg {
+    padding: 6px 20px;
+    width: 230px;
+  }
+
+  .image {
+    width: 100%;
+    max-width: 540px;
+  }
+
+  .topnav {
+    width: 100%;
+    left: 0;
+    top: 0;
+    position: fixed;
+    background-color: #ebf0f8;
+    display: flex;
+    align-items: center;
+    color: #344563;
+    overflow: hidden;
+    z-index: 10;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.5);
+  }
+  
+  .topnav a , .topnav span , .topnav custom-file-upload{
+    float: left;
+    color: #344563;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+    font-size: 24px;
+    cursor: pointer;
+    border-radius: 12px
+  }
+
+  .topnav img {
+    cursor: pointer;
+  }
+
+  #LogoBlau {
+    margin-left: auto;
+    margin-right: 20px;
+  }
+
+  .topnav a:hover, span:hover {
+    background-color: #c9dbf9;
+    color: #202124;
+  }
+
+  .topnav input {
+    text-align: left;
+    width: 70%;
+    font-size: 17px;
+  }
+
+  .sidenav {
+    height: 100%;
+    width: 280px;
+    position: fixed;
+    z-index: 1;
+    top: 30;
+    left: 0;
+    color: #344563;
+    background-color: #f7faff;
+    overflow-x: hidden;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    z-index: 5;
+    padding-top: 30px;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.5);
+  }
+  
+  .sidenav a {
+    padding: 6px 6px 6px 6px;
+    text-decoration: none;
+    font-size: 25px;
+    color: #344563;
+    display: block;
+  }
+  
+  .sidenav a:hover {
+    background-color: #c9dbf9;
+    color: #202124;
+  }
+  .sidenav h1{
+    text-align: center;
+  }
+  .sidenav h2{
+    text-align: center;
+  }
+  .sidenav select{
+    width: 77%;
+  }
+
+  .checkboxesPlace {
+    max-height: 80%;
+    position: relative;
+    overflow-y: auto;
+  }
+
+  .pale {
+    transition: background-color 0.3s ease;
+    background-color: rgba(0, 0, 0, 0.1);
+    opacity: 0.5;
+  }
+
+  #explenation_text {
+    top: 100;
+    margin-left: 300px;
+    margin-top: 40px;
+    font-size: 18px;
+    padding: 0px 10px;
+    line-height: 27px
+  }
+  
+  .explenation_text{
+    margin-top: 500px;
+    padding: 20px;
+    margin-left: 250px;
+  }
+
+  .plot-area {
+    margin-left: 280px;
+    font-size: 28px;
+    padding: 0px 0px;
+  }
+  
+  @media screen and (max-height: 750px) {
+    .sidenav {padding-top: 15px;}
+    .sidenav a {font-size: 18px;}
+  }
+
+  /* The Plotly table */
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    table-layout: fixed;
+  }
+  
+  td {
+    border: none;
+    padding: 0px;
+    width: 50%;
+    height: 30px;
+  }
+  
+  .plot-container {
+    width: 100%;
+    height: 350px;
+  }
+
+  /* The results Table */
+  #resultsTable {
+    border-collapse: collapse;
+    margin: 0 auto;
+    margin-top: 60px;
+  }
+
+  #resultsTable th, #resultsTable td {
+    border: 1px solid black;
+    padding: 8px;
+  }
+
+  #resultsTable th {
+    background-color: #f7faff;
+  }
+
+  #resultsTable, th, td {
+    width: auto;
+    height: auto;
+    white-space: nowrap;
+  }

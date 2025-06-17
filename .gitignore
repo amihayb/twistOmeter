@@ -1,0 +1,16 @@
+# Node-related (if you're using npm for development)
+node_modules/
+
+# Log files
+*.log
+
+# OS-specific junk
+.DS_Store
+Thumbs.db
+
+# Editor/IDE files
+.vscode/
+.idea/
+
+# Environment files (if you ever use .env for settings)
+.env

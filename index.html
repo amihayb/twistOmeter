@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Twist O Meter</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link href="StyleSheet.css" rel="stylesheet">
+  <link rel="shortcut icon" href="images/RafaelLogo.ico" />
+  <link rel="icon" href="images/RafaelLogo.ico" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <link rel="stylesheet" href="assets/knob.css" />
+</head>
+
+<body>
+  <div class="topnav" id="topnav" margin-left="260px" padding="0px 10px">
+    <img src="images/RafLogo.svg" alt="Rafael logo" class="headImg">
+    <span><i class="fa fa-folder-open" title="Open File"></i>
+      <input id="file-selector" type="file" />
+    </span>
+    <a onclick="about()"
+      title="About"><i class="fa fa-info-circle"></i></a>
+    <img
+      onclick="about()"
+      height="36" src="images/logo-title.svg" alt="Blau Robotics" id="LogoBlau">
+  </div>
+  <div class="sidenav" id="sidenav">
+    <h1>Motor Control</h1>
+    <div class="toggle-container" style="display: flex; justify-content: space-between; align-items: center; padding: 0 15px;">
+      <label class="toggle-label" for="connection-toggle">Connection Status</label>
+      <label class="toggle-container">
+        <input type="checkbox" id="connection-toggle" class="toggle-input" onchange="connectToggle(this)">
+        <span class="toggle-slider"></span>
+      </label>
+    </div><br>
+    <div class="toggle-container"  style="display: flex; justify-content: space-between; align-items: center; padding: 0 15px;">
+      <label class="toggle-label" for="motor-toggle">Motor On</label>
+      <label class="toggle-container">
+        <input type="checkbox" id="motor-toggle" class="toggle-input" onchange="motorToggle(this)">
+        <span class="toggle-slider"></span>
+      </label>
+    </div><br>
+    <div class="target-control" >
+      <label for="targetInput">Target [deg]</label>
+      <input type="text" id="targetInput" value="0" />
+      <button id="setButton" onclick="updateAngleFromInput()">Set</button>
+    </div>
+    <div class="knob-container">
+      <div class="angle-display" id="angleDisplay">0°</div>
+      <img src="assets/knob.svg" class="knob" id="knob" alt="Knob" />
+      <img src="assets/littleKnob.svg" class="little-knob" id="handle" alt="Little Knob" />
+    </div>
+    <script src="assets/knob.js"></script>
+    <hr>
+    <div>
+      <a href="#" class="button active" id="torque-test-button" onclick="TorqueTest();">Torque Test</a>
+      <a href="#" class="button" onclick="DurabilityTest();">Durability Test</a>
+      <a href="#" class="button" onclick="AnalyzeRecord();">Analyze Record</a>
+    </div>
+    <hr>
+    <h1>Torque Test</h1>
+    <div class="target-control">
+      <label for="minAngleInput">Min Angle [deg]</label>
+      <input type="text" id="minAngleInput" value="-30" />
+    </div><br>
+    <div class="target-control">
+      <label for="maxAngleInput">Max Angle [deg]</label>
+      <input type="text" id="maxAngleInput" value="30" />
+    </div><br>
+    <div class="target-control">
+      <label for="velocityInput">Velocity [deg/s]</label>
+      <input type="text" id="velocityInput" value="20" />
+    </div>
+    <div class="target-control" style="display: flex; justify-content: center; margin-top: 10px;">
+      <button id="startButton" onclick="startTorqueTest()" style="width: 80%;">Start</button>
+    </div>
+  </div>
+  <div id="drop-zone" ondrop="handleDrop(event)" ondragover="handleDragOver(event)"
+    ondragleave="handleDragLeave(event)">
+    <div id="explenation_text">
+      Drag & Drop CSV File Here
+      <br>
+      <picture id="picture_main">
+        <img src="images/Device.jpg" alt="Device Image" id="deviceImage" style="max-width: 100%; height: auto; width: 1000px;">
+      </picture>
+      <br>
+      <div id="explenation_label">
+        <h2>Twist-O-Meter</h2>
+        <ul>
+          <li>Measure cable torsion and bending forces</li>
+          <li>Run durability and lifetime tests with ease</li>
+        </ul>
+        <p>Good luck and happy testing!</p>
+      </div>
+    </div>
+    <table id="resultsTable" border="1"></table>
+    <!-- Table will be populated by JavaScript -->
+    </table>
+    <div class="plot-area" id="plot-area">
+    </div>
+  </div>
+  <script src="app.js"></script>
+</body>
+
+</html>
