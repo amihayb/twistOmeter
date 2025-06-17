@@ -65,6 +65,9 @@
     <hr>
     <h1>Torque Test</h1>
     <div class="target-control">
+      <label>Range: -160° to +110°</label>
+    </div><br>
+    <div class="target-control">
       <label for="minAngleInput">Min Angle [deg]</label>
       <input type="text" id="minAngleInput" value="-30" />
     </div><br>
@@ -75,6 +78,10 @@
     <div class="target-control">
       <label for="velocityInput">Velocity [deg/s]</label>
       <input type="text" id="velocityInput" value="20" />
+    </div><br>
+    <div class="target-control">
+      <label for="repsInput">Repetitions</label>
+      <input type="text" id="repsInput" value="2" />
     </div>
     <div class="target-control" style="display: flex; justify-content: center; margin-top: 10px;">
       <button id="startButton" onclick="startTorqueTest()" style="width: 80%;">Start</button>

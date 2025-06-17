@@ -308,9 +308,9 @@ async function startTorqueTest() {
       cycleCount += 0.5; // Half cycle completed
       shouldRecordData = true; // Start recording after first time reaching minAngle
     }
-
+    const reps = document.getElementById('repsInput');
     // Check if two complete cycles are done
-    if (cycleCount >= 2) {
+    if (cycleCount >= reps.value) {
       // Turn off motor at end of test
       const motorToggle = document.getElementById('motor-toggle');
       motorToggle.checked = false;
@@ -1137,11 +1137,11 @@ let d2r = 3.1416 / 180;
 
 function validateAngleInput(inputElement) {
   const value = parseFloat(inputElement.value);
-  if (isNaN(value) || value < -180 || value > 180) {
+  if (isNaN(value) || value < -160 || value > 110) {
     inputElement.value = '0';
     Swal.fire({
       title: 'Invalid Angle',
-      text: 'Angle must be between -180 and 180 degrees',
+      text: 'Angle must be between -160 and 110 degrees',
       icon: 'error'
     });
   }
