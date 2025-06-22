@@ -8,19 +8,21 @@ let intervalMove;
 let angle = 0;
 
 // Add at the top with other global variables
-let angleData = [];
-let currentData = [];
-let timeData = [];
+// let angleData = [];
+// let currentData = [];
+// let timeData = [];
 let startTime;
 let shouldRecordData = false;
 let prevAngle = null;
 let firstValidRead = false;
+let angleChangeFailCount = 0;
 
 // Replace angleData, currentData, timeData arrays with rows object
 let rows = {
   time: [],
   angle: [],
-  current: []
+  current: [],
+  torque: []
 };
 
 function about(){
@@ -42,9 +44,13 @@ async function connectToggle(button) {
       button.checked = false; // Uncheck the toggle button if connection fails
       return
     }
-    await sendMsg('eo=0;');
-    showAngle(true);
+    await readMsg('eo=0;');
+    const moState = await readMsg('mo');
+    if (moState.includes('1')) {
+      document.getElementById('motor-toggle').checked = true;
+    }
 
+    showAngle(true);
   } else {
     showAngle(false);
     await sendMsg('eo=1;');
@@ -117,6 +123,14 @@ async function readMsg(message) {
   //   await reader.releaseLock();
   }
 }
+
+
+async function flushSerialReader(timeout = 100) {
+  
+  await reader.cancel();             // Signals the stream to discard data
+  reader.releaseLock();              // Releases the lock
+  reader = serialPort.readable.getReader(); // Get a fresh reader
+}
 /////////// End of Communication ///////////
 
 
@@ -170,6 +184,7 @@ async function showAngle(state) {
   if (intervalShowAngle && !state) {
       clearInterval(intervalShowAngle);
       intervalShowAngle = null;
+      prevAngle = null;
       console.log("Stopped show angle interval");
   } else if (state)  {
       console.log("Start show angle interval");
@@ -207,6 +222,14 @@ async function updateAngleFromInterval() {
     const angleChange = Math.abs(rawAngle - prevAngle);
     if (angleChange > 10) {
       isValid = false;
+      angleChangeFailCount++;
+      if (angleChangeFailCount >= 10) {
+        prevAngle = null;
+        angleChangeFailCount = 0;
+        console.warn('Angle change check failed 10 times, resetting prevAngle.');
+      }
+    } else {
+      angleChangeFailCount = 0;
     }
   }
   
@@ -222,11 +245,13 @@ async function updateAngleFromInterval() {
     firstValidRead = true;
     
     updateAngle(angle);
+    document.getElementById('CurrentInput').value = current.toFixed(1);
 
     // Save data if test is running and we've reached minAngle at least once
     if (intervalMove && shouldRecordData) {
       rows.angle.push(angle);
       rows.current.push(current);
+      rows.torque.push(current * 27.8);
       rows.time.push(Date.now() - startTime); // Time in milliseconds
     }
   }
@@ -240,8 +265,57 @@ async function updateAngleFromInput() {
 
   // Call updateAngle from knob.js
   updateAngle( tangle );
+  
   sendMsg('pa=' + Math.floor(tangle * 728.178) + ';bg'); // Convert to raw value
 }
+
+
+async function setCurrentAngle() {
+
+  const setAngle = parseFloat(document.getElementById('setAngle').value);
+  // Show confirmation dialog
+  const result = await Swal.fire({
+    title: 'Set Current Angle',
+    text: `Are you sure you want to set current angle to ${setAngle}?`,
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: 'Yes',
+    cancelButtonText: 'No'
+  });
+  if (!result.isConfirmed) {
+    console.log('Canceled');
+    return;
+  }
+
+  showAngle(false);
+  await flushSerialReader();
+
+  var tRead = await readMsg('S2[17]');
+  const curOffset = parseFloat(tRead.replace(';', ''));
+  const currentAngle = Math.floor((setAngle - angle) * 728.178) + curOffset;
+  sendMsg('S2[17]=' + currentAngle);
+  console.log('S2[17]=' + currentAngle);
+  // Send message based on whether angle is negative
+  if (currentAngle > 0.0) {
+    sendMsg('S2[18]=0;');
+    console.log('S2[18]=0;');
+  } else {
+    sendMsg('S2[18]=-1;');
+    console.log('S2[18]=-1;');
+  }
+  sendMsg('s2[1]=0');    // Restart encoder
+  sendMsg('s2[1]=5;');    // Set back encoder type
+  await new Promise(resolve => setTimeout(resolve, 200));
+  sendMsg('sv;');
+
+  // console.log('sv; bu=0x1234');
+  //sendMsg('sv; bu=0x1234');    // Restart driver
+
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  await flushSerialReader();
+  showAngle(true);
+}
+
 
 
 async function startTorqueTest() {
@@ -281,7 +355,8 @@ async function startTorqueTest() {
   rows = {
     time: [],
     angle: [],
-    current: []
+    current: [],
+    torque: []
   };
   shouldRecordData = false;
   startTime = Date.now();
@@ -321,6 +396,7 @@ async function startTorqueTest() {
       startButton.disabled = false;
       startButton.style.opacity = '1';
       startButton.style.cursor = 'pointer';
+      //shouldRecordData = false;
 
       // Show test results
       showTorqueTest();
@@ -333,10 +409,10 @@ async function startTorqueTest() {
 }
 
 function saveDataToCSV() {
-  let csvContent = "Time_ms,Angle_deg,Current_A\n";
+  let csvContent = "Time_ms,Angle_deg,Current_A,Torque_mNm\n";
   
   for (let i = 0; i < rows.time.length; i++) {
-    csvContent += `${rows.time[i]},${rows.angle[i].toFixed(3)},${rows.current[i].toFixed(3)}\n`;
+    csvContent += `${rows.time[i]},${rows.angle[i].toFixed(3)},${rows.current[i].toFixed(3)},${rows.torque[i].toFixed(3)}\n`;
   }
 
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -417,6 +493,10 @@ function readFile(file) {
     if (rows['Current_A']) {
       rows['current'] = rows['Current_A'];
       delete rows['Current_A'];
+    }
+    if (rows['Torque_mNm']) {
+      rows['torque'] = rows['Torque_mNm'];
+      delete rows['Torque_mNm'];
     }
 
     showTorqueTest();
@@ -736,16 +816,23 @@ document.querySelectorAll('.button').forEach(link => {
 
 function showTorqueTest() {
   cleanUp();
+
   const pl = createSplitPlotlyTable('plot-area');
 
   // Main plot: Angle vs Current (Hysteresis plot)
-  plot(pl, 0, 0, rows.angle, rows.current, traceName = 'Angle', title = "Command - Position", "Angle [deg]", 'Torque [mNm]', null, false, 'markers');
+  plot(pl, 0, 0, rows.angle, rows.torque, traceName = 'Angle', title = "Command - Position", "Angle [deg]", 'Torque [mNm]', null, false, 'markers');
+  
+  // Calculate regression and add regression line
+  const regressionResult = calculateRegression();
+  if (regressionResult) {
+    plot(pl, 0, 0, rows.regressionAngles, rows.regressionCurrents, traceName = 'Regression', title = "Command - Position", "Angle [deg]", 'Torque [mNm]', 'red', true, 'lines');
+  }
   
   // Top right: Angle vs Time
   plot(pl, 0, 1, mult(rows.time, 0.001), rows.angle, traceName = 'Angle', title = "Position", "Time [s]", "Angle [deg]", null, false);
   
   // Bottom right: Current vs Time
-  plot(pl, 1, 1, mult(rows.time, 0.001), rows.current, traceName = 'Current', title = "Torque", "Time [s]", "Torque [mNm]", null, false);
+  plot(pl, 1, 1, mult(rows.time, 0.001), rows.current, traceName = 'Current', title = "Current", "Time [s]", "Current [Amp]", null, false);
 }
 
 
@@ -980,6 +1067,22 @@ function std(v) {
 function export2csv() {
 
   exportToCsv('download.csv', rows);
+}
+
+function fitLinear(x, y) {
+  const n = x.length;
+  if (n !== y.length) throw new Error("x and y must be same length");
+
+  const meanX = x.reduce((sum, xi) => sum + xi, 0) / n;
+  const meanY = y.reduce((sum, yi) => sum + yi, 0) / n;
+
+  const numerator = x.reduce((sum, xi, i) => sum + (xi - meanX) * (y[i] - meanY), 0);
+  const denominator = x.reduce((sum, xi) => sum + (xi - meanX) * (xi - meanX), 0);
+
+  const slope = numerator / denominator;
+  const bias = meanY - slope*meanX;
+
+  return { slope, bias };
 }
 
 function exportToCsv(filename, rows) {
@@ -1268,5 +1371,59 @@ function AnalyzeRecord(){
     // Reset the file input
     fileSelector.value = '';
   }, { once: true });
+}
+
+function calculateRegression() {
+  // Check if we have data to analyze
+  if (!rows.angle || !rows.torque || rows.angle.length === 0 || rows.torque.length === 0) {
+    Swal.fire({
+      title: 'No Data',
+      text: 'Please record or load data before calculating regression',
+      icon: 'error'
+    });
+    return null;
+  }
+
+  // Prepare data for regression
+  const { slope, bias } = fitLinear(rows.angle, rows.torque);
+
+  // Format the equation
+  const equation = `y = ${slope.toFixed(3)}x + ${bias.toFixed(3)}`;
+  
+  // Create evenly spaced angles array
+  const minAngle = Math.floor(Math.min(...rows.angle));
+  const maxAngle = Math.ceil(Math.max(...rows.angle));
+  const regressionAngles = [];
+  const regressionCurrents = [];
+  
+  // Generate angles with 1-degree resolution
+  for (let angle = minAngle; angle <= maxAngle; angle++) {
+    regressionAngles.push(angle);
+    // Calculate current using regression equation: y = mx + b
+    const current = slope * angle + bias;
+    regressionCurrents.push(current);
+  }
+  
+  // Store regression data in rows object
+  rows.regressionAngles = regressionAngles;
+  rows.regressionCurrents = regressionCurrents;
+  
+  // Display results
+  // Swal.fire({
+  //   title: 'Regression Analysis',
+  //   html: `
+  //     <p>Equation: ${equation}</p>
+  //     <p>Generated ${regressionAngles.length} points from ${minAngle}° to ${maxAngle}°</p>
+  //   `,
+  //   icon: 'info'
+  // });
+
+  return {
+    slope,
+    bias,
+    string: equation,
+    angles: regressionAngles,
+    currents: regressionCurrents
+  };
 }
 
