@@ -63,8 +63,12 @@
     </div>
     <script src="assets/knob.js"></script>
     <div class="target-control" title="Motor active current">
-      <label for="velocityInput">Current [Amp]</label>
+      <label for="CurrentInput">Current [Amp]</label>
       <input type="text" id="CurrentInput" value="0" />
+    </div><br>
+    <div class="target-control" title="Motor active torque">
+      <label for="turqueInput">Torque [mNm]</label>
+      <input type="text" id="torqueInput" value="0" />
     </div>
     <hr>
     <div>
@@ -74,9 +78,7 @@
     </div>
     <hr>
     <h1>Torque Test</h1>
-    <div class="target-control">
-      <label>Range: -160° to +110°</label>
-    </div><br>
+    <br>
     <div class="target-control" title="Limit angle for movement range">
       <label for="minAngleInput">Min Angle [deg]</label>
       <input type="text" id="minAngleInput" value="-30" />

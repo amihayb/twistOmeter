@@ -6,6 +6,7 @@ let intervalShowAngle = null;
 let intervalMove;
 
 let angle = 0;
+const angleMedian = createStreamingMedian5();
 
 // Add at the top with other global variables
 // let angleData = [];
@@ -213,14 +214,14 @@ async function updateAngleFromInterval() {
   }
   
   // Check if angle is within valid range (-180 to 180)
-  if (rawAngle < -180 || rawAngle > 180) {
-    isValid = false;
-  }
+  // if (rawAngle < -180 || rawAngle > 180) {
+  //   isValid = false;
+  // }
   
   // Check angle change rate if we have a previous value
   if (prevAngle !== null) {
     const angleChange = Math.abs(rawAngle - prevAngle);
-    if (angleChange > 10) {
+    if (angleChange > 20) {
       isValid = false;
       angleChangeFailCount++;
       if (angleChangeFailCount >= 10) {
@@ -240,12 +241,14 @@ async function updateAngleFromInterval() {
   
   // Only update angle and record data if values are valid
   if (isValid) {
+    angle = angleMedian( rawAngle );
     angle = rawAngle;
     prevAngle = angle;
     firstValidRead = true;
     
     updateAngle(angle);
     document.getElementById('CurrentInput').value = current.toFixed(1);
+    document.getElementById('torqueInput').value = (27.8 * current).toFixed(0);
 
     // Save data if test is running and we've reached minAngle at least once
     if (intervalMove && shouldRecordData) {
@@ -306,7 +309,9 @@ async function setCurrentAngle() {
   sendMsg('s2[1]=0');    // Restart encoder
   sendMsg('s2[1]=5;');    // Set back encoder type
   await new Promise(resolve => setTimeout(resolve, 200));
+  await readMsg('eo=1;');
   sendMsg('sv;');
+  await readMsg('eo=0;');
 
   // console.log('sv; bu=0x1234');
   //sendMsg('sv; bu=0x1234');    // Restart driver
@@ -1240,11 +1245,11 @@ let d2r = 3.1416 / 180;
 
 function validateAngleInput(inputElement) {
   const value = parseFloat(inputElement.value);
-  if (isNaN(value) || value < -160 || value > 110) {
+  if (isNaN(value)) {   //|| value < -160 || value > 110
     inputElement.value = '0';
     Swal.fire({
       title: 'Invalid Angle',
-      text: 'Angle must be between -160 and 110 degrees',
+      text: 'Angle must be a valid degree number.',
       icon: 'error'
     });
   }
@@ -1252,11 +1257,11 @@ function validateAngleInput(inputElement) {
 
 function validateVelocityInput(inputElement) {
   const value = parseFloat(inputElement.value);
-  if (isNaN(value) || value < 1 || value > 60) {
+  if (isNaN(value) || value < 1 || value > 100) {
     inputElement.value = '30';
     Swal.fire({
       title: 'Invalid Velocity',
-      text: 'Velocity must be between 1 and 60 deg/s',
+      text: 'Velocity must be between 1 and 100 deg/s',
       icon: 'error'
     });
   }
@@ -1427,3 +1432,25 @@ function calculateRegression() {
   };
 }
 
+// function median5(a, b, c, d, e) {
+//   const arr = [a, b, c, d, e];
+//   // Efficient sort for 5 items (fixed cost)
+//   arr.sort((x, y) => x - y);
+//   return arr[2]; // median is the 3rd element
+// }
+
+function createStreamingMedian5() {
+  const window = [];
+
+  return function addSample(value) {
+    // Keep only the last 5 samples
+    window.push(value);
+    if (window.length > 5) window.shift();
+
+    if (window.length < 5) return null; // Not enough data yet
+
+    // Copy and sort to find median
+    const sorted = window.slice().sort((a, b) => a - b);
+    return sorted[2];
+  };
+}
