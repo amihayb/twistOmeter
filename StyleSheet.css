@@ -126,6 +126,7 @@ body {
     width: 100%;
     left: 0;
     top: 0;
+    height: 64px;
     position: fixed;
     background-color: #ebf0f8;
     display: flex;
@@ -168,19 +169,18 @@ body {
   }
 
   .sidenav {
-    height: 100%;
     width: 280px;
     position: fixed;
-    z-index: 1;
-    top: 30;
+    z-index: 5;
+    top: 64px;
     left: 0;
+    height: calc(100vh - 64px);
     color: #344563;
     background-color: #f7faff;
     overflow-x: hidden;
-    padding-top: 5px;
-    padding-bottom: 5px;
-    z-index: 5;
-    padding-top: 30px;
+    overflow-y: auto;
+    padding-top: 10px;
+    padding-bottom: 10px;
     box-shadow: 2px 0 5px rgba(0,0,0,0.5);
   }
   
