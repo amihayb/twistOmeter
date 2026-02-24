@@ -7,8 +7,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <link href="StyleSheet.css" rel="stylesheet">
-  <link rel="shortcut icon" href="images/RafaelLogo.ico" />
-  <link rel="icon" href="images/RafaelLogo.ico" />
+  <link rel="shortcut icon" href="images/logo-icon.svg" />
+  <link rel="icon" href="images/logo-icon.svg" type="image/svg+xml" />
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1e1e1e">
+  <link rel="apple-touch-icon" href="images/logo-icon.svg">
   <link rel="stylesheet" href="vendor/font-awesome.min.css">
   <script src="vendor/regression.min.js"></script>
   <script src="vendor/sweetalert2@11.js"></script>
@@ -133,6 +136,11 @@
     </div>
   </div>
   <script src="app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js');
+    }
+  </script>
 </body>
 
 </html>
